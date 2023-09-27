@@ -58,7 +58,7 @@ node master.js
 4. Once all tasks are completed, the final word counts will be logged to the console and saved to `output.txt`.
 
 ## References:
-Implementation is based on this paper MapReduce: Simplified Data Processing on Large Clusters
+Implementation is based on [MapReduce: Simplified Data Processing on Large Clusters](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/16cb30b4b92fd4989b8619a61752a2387c6dd474.pdf)
 
 ## Configuration
 
