@@ -6,32 +6,33 @@ process.on('message', async task => {
 
   try {
     const filepath = path.resolve(file);
-    const data = fs.readFileSync(filepath, 'utf8');
+    const readStream = fs.createReadStream(filepath, { encoding: 'utf8' });
 
-    const counts = {};
+    let counts = {};
 
-    // Use regular expression to match words containing only letters
-    const wordPattern = /[a-zA-Z]+/g;
-    const words = data.match(wordPattern);
+    readStream.on('data', (chunk) => {
+      const wordPattern = /[a-zA-Z]+/g;
+      const words = chunk.match(wordPattern);
 
-    if (words) {
-      words.forEach(word => {
-        counts[word] = (counts[word] || 0) + 1;
-      });
-    }
+      if (words) {
+        words.forEach(word => {
+          counts[word] = (counts[word] || 0) + 1;
+        });
+      }
+    });
 
-    const elapsed = Date.now() - start; // Calculate elapsed time
+    readStream.on('end', () => {
+      const elapsed = Date.now() - start;
+      console.log(`Processed task ${id} in ${elapsed} ms`);
+      process.send({ id, counts, elapsed });
+    });
 
-    console.log(`Processed task ${id} in ${elapsed} ms`);
-
-    process.send({ id, counts, elapsed }); // Send elapsed time and counts back to master
-
+    readStream.on('error', (error) => {
+      console.error(error);
+      process.send({ id, error: error.message });
+    });
   } catch (error) {
     console.error(error);
-
-    process.send({
-      id,
-      error: error.message
-    });
+    process.send({ id, error: error.message });
   }
 });

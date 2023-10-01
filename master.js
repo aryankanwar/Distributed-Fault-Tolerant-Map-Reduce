@@ -28,7 +28,10 @@ if (cluster.isMaster) {
     const worker = cluster.fork();
 
     worker.on('message', (msg) => {
+      //worker process sending a message back to the master process
       if (msg.counts) {
+        //The master process checks if msg.counts exists (if (msg.counts)). 
+        //If it does, it merges the counts into the counts object 
         Object.assign(counts, msg.counts);
       }
       if (msg.elapsed) {
