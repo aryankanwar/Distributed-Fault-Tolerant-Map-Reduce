@@ -3,39 +3,53 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const counts = {}; // aggregated counts
+const counts = {};
+const timings = [];
 
 if (cluster.isMaster) {
-  const numWorkers = os.cpus().length;
 
+  const numWorkers = os.cpus().length;
+  
   cluster.setupMaster({
     exec: 'worker.js'
   });
 
   const inputFiles = fs.readdirSync('files').filter(f => f.startsWith('input-'));
-  const tasks = inputFiles.map((file, index) => ({
-    id: index,
-    file: path.join('files', file) // full path
-  }));
 
   let taskIndex = 0;
 
+  const tasks = inputFiles.map((file, index) => ({
+    id: index,
+    file: path.join('files', file), 
+    start: Date.now()
+  }));
+
   for (let i = 0; i < numWorkers; i++) {
     const worker = cluster.fork();
+
     worker.on('message', (msg) => {
       if (msg.counts) {
         Object.assign(counts, msg.counts);
+      }
+      if (msg.elapsed) {
+        timings.push({
+          id: msg.id,
+          elapsed: msg.elapsed
+        });
+        console.log(`Task ${msg.id} took ${msg.elapsed} ms`);
+      }
 
-        // Check if there are more tasks
-        if (taskIndex < tasks.length) {
-          const nextTask = tasks[taskIndex];
-          taskIndex++;
-          worker.send(nextTask);
-        } else {
-          // No more tasks, log final result and write to file
-          console.log(counts);
-          fs.writeFileSync('output.txt', JSON.stringify(counts, null, 2));
-        }
+      if (taskIndex < tasks.length) {
+        const nextTask = tasks[taskIndex];
+        taskIndex++;
+        worker.send({...nextTask, start: nextTask.start}); 
+      } else {
+        console.log(counts);
+        console.log(timings);
+        fs.writeFileSync('output.txt', JSON.stringify({
+          counts,
+          timings
+        }, null, 2));
       }
     });
   }
@@ -48,4 +62,5 @@ if (cluster.isMaster) {
       taskIndex++;
     }
   }
+
 }
