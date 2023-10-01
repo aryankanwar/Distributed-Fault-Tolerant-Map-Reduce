@@ -5,9 +5,21 @@
 This Node.js application uses the cluster module to distribute tasks for processing text files and counting word occurrences across multiple worker processes.
 
 ## Features
-- Implements parallel processing of word counting tasks across multiple worker processes.
-- Detailed logging and metrics to measure performance (time taken per file, per worker).
-- Supports larger files by reading in chunks/streams rather than all at once.
+- Implements parallel processing of word counting tasks across multiple worker processes. ✅
+- Detailed logging and metrics to measure performance (time taken per file, per worker).✅
+- Supports larger files by reading in chunks/streams rather than all at once.✅
+- Add compression to files being sent between master and workers. 🔜 
+- Allow dynamic scaling of workers based on load rather than just num CPUs.🔜 
+- Persist counts to disk periodically in case of crashes.🔜 
+- Add authentication between master and workers for security.🔜 
+- Allow word blacklist to exclude common words like "the", "and" etc.🔜 
+- Build a proper CLI interface for configuring options and file inputs.🔜 
+- Containerize with Docker for easy deployment and distribution.🔜 
+- Automate benchmarking different configurations to tune performance.🔜 
+- Support different count aggregation strategies like sum, min, max etc.🔜 
+- Add a REST API frontend to submit jobs and query results.🔜 
+- Use a proper queue like RabbitMQ to distribute tasks rather than custom logic.🔜 
+- Store results in a database rather than just a local file.🔜 
 
 ## References:
 Implementation is based on [MapReduce: Simplified Data Processing on Large Clusters](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/16cb30b4b92fd4989b8619a61752a2387c6dd474.pdf)
