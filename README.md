@@ -23,7 +23,10 @@ This application utilizes a simplified form of the MapReduce paradigm for proces
 This process effectively distributes the workload across multiple processes, allowing for parallel processing and improved performance.
 
 
-
+## Features
+- Implements parallel processing of word counting tasks across multiple worker processes.
+- Detailed logging and metrics to measure performance (time taken per file, per worker).
+- Supports larger files by reading in chunks/streams rather than all at once.
 
 ## Prerequisites
 
