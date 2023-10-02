@@ -8,11 +8,11 @@ This Node.js application uses the cluster module to distribute tasks for process
 - Implements parallel processing of word counting tasks across multiple worker processes. ✅
 - Detailed logging and metrics to measure performance (time taken per file, per worker).✅
 - Supports larger files by reading in chunks/streams rather than all at once.✅
-- Add compression to files being sent between master and workers. 🔜 
 - Allow dynamic scaling of workers based on load rather than just num CPUs.🔜 
 - Persist counts to disk periodically in case of crashes.🔜 
 - Add authentication between master and workers for security.🔜 
-- Allow word blacklist to exclude common words like "the", "and" etc.🔜 
+- Allow word blacklist to exclude common words like "the", "and" etc.🔜
+- Add compression to files being sent between master and workers. 🔜 
 - Build a proper CLI interface for configuring options and file inputs.🔜 
 - Containerize with Docker for easy deployment and distribution.🔜 
 - Automate benchmarking different configurations to tune performance.🔜 
