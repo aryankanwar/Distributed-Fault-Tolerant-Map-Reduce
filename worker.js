@@ -1,6 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
+const blacklist = new Set(['the', 'and', 'or', 'in', 'on', 'at', 'to', 'with', 'a', 'an', 'of',
+'for', 'as', 'by', 'but', 'is', 'it', 'that', 'which', 'this', 'not',
+'are', 'was', 'from', 'have', 'had', 'has', 'if', 'at', 'can', 'be',
+'will', 'you', 'we', 'your', 'my', 'his', 'her', 'their', 'its']);
+
 process.on('message', async task => {
   const { id, file, start } = task;
 
@@ -16,7 +21,10 @@ process.on('message', async task => {
 
       if (words) {
         words.forEach(word => {
-          counts[word] = (counts[word] || 0) + 1;
+          const cleanedWord = word.toLowerCase(); // Convert to lowercase for case-insensitive comparison
+          if (!blacklist.has(cleanedWord)) {
+            counts[cleanedWord] = (counts[cleanedWord] || 0) + 1;
+          }
         });
       }
     });
