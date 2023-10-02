@@ -1,6 +1,6 @@
 
 ---
-# Word Counting with Node.js Clusters
+# Distributed file processing using Node.js Clusters
 
 This Node.js application uses the cluster module to distribute tasks for processing text files and counting word occurrences across multiple worker processes.
 
