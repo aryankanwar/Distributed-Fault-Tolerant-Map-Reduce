@@ -21,8 +21,8 @@ process.on('message', async task => {
 
       if (words) {
         words.forEach(word => {
-          const cleanedWord = word.toLowerCase(); // Convert to lowercase for case-insensitive comparison
-          if (!blacklist.has(cleanedWord)) {
+           const cleanedWord = word.toLowerCase(); // Convert to lowercase for case-insensitive comparison
+          if (!blacklist.has(word)) {
             counts[cleanedWord] = (counts[cleanedWord] || 0) + 1;
           }
         });

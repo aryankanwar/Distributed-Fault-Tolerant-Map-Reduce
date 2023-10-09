@@ -6,10 +6,10 @@ const os = require('os');
 const counts = {};
 const timings = [];
 
-if (cluster.isMaster) {
+const numWorkers = os.cpus().length;
+const workers = [];
 
-  const numWorkers = os.cpus().length;
-  
+if (cluster.isMaster) {
   cluster.setupMaster({
     exec: 'worker.js'
   });
@@ -24,15 +24,49 @@ if (cluster.isMaster) {
     start: Date.now()
   }));
 
+  // Fork workers
   for (let i = 0; i < numWorkers; i++) {
     const worker = cluster.fork();
+    workers.push(worker);
+  }
+  
+  // Send initial tasks to workers
+  tasks.slice(0, numWorkers).forEach(distributeTask);
 
+
+  // Function to distribute tasks in a round-robin fashion
+  function distributeTask(task) {
+    const worker = workers[taskIndex % numWorkers];
+    worker.send({ ...task, start: task.start });
+    taskIndex++;
+  }
+
+/*
+The reason for looping through each worker and attaching a message handler, rather than just
+Is because this code is running in the master process, which forks multiple worker processes.
+The master needs to listen for messages coming back from each worker separately.
+If we just did:
+worker.on('message'...
+This would only listen to messages from a single worker, the last one forked.
+By looping through the workers array and attaching the handler to each one, \the master can now listen to all its workers:*/
+
+  // Handle messages from workers
+  workers.forEach(worker => {
     worker.on('message', (msg) => {
-      //worker process sending a message back to the master process
+      //dont use         Object.assign(counts, msg.counts);
+      /*Object.assign is doing a shallow merge, 
+      so each worker was gets a reference to the same counts object. 
+      By merging manually, each worker has its own isolated counts, 
+      which then get aggregated correctly in the master.*/
+
       if (msg.counts) {
-        //The master process checks if msg.counts exists (if (msg.counts)). 
-        //If it does, it merges the counts into the counts object 
-        Object.assign(counts, msg.counts);
+        for (const key in msg.counts) {
+          if (counts[key]) {
+            counts[key] += msg.counts[key];
+          } else {
+            counts[key] = msg.counts[key];
+          }
+        }
       }
       if (msg.elapsed) {
         timings.push({
@@ -42,11 +76,11 @@ if (cluster.isMaster) {
         console.log(`Task ${msg.id} took ${msg.elapsed} ms`);
       }
 
-      if (taskIndex < tasks.length) {
-        const nextTask = tasks[taskIndex];
-        taskIndex++;
-        worker.send({...nextTask, start: nextTask.start}); 
-      } else {
+      const nextTask = tasks[taskIndex++];
+      if (nextTask) {
+        distributeTask(nextTask);
+      } 
+      else {
         console.log(counts);
         console.log(timings);
         fs.writeFileSync('output.txt', JSON.stringify({
@@ -55,15 +89,5 @@ if (cluster.isMaster) {
         }, null, 2));
       }
     });
-  }
-
-  // Send initial tasks to workers
-  for (let i = 0; i < numWorkers; i++) {
-    const worker = Object.values(cluster.workers)[i];
-    if (taskIndex < tasks.length) {
-      worker.send(tasks[taskIndex]);
-      taskIndex++;
-    }
-  }
-
+  });
 }
